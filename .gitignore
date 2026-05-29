@@ -1,0 +1,46 @@
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Database (runtime)
+database/stocksense.db
+database/stocksense.db-wal
+database/stocksense.db-shm
+
+# ML models (large files)
+ml/models/*.pkl
+ml/models/*.h5
+ml/models/*.keras
+
+# Logs
+logs/
+
+# Streamlit config (only ignore caches/credentials in .streamlit, keep config.toml)
+.streamlit/*
+!.streamlit/config.toml
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Test output
+.pytest_cache/
+htmlcov/
+.coverage
+
