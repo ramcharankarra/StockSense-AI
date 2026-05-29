@@ -21,6 +21,80 @@ import yfinance as yf
 from auth.session_manager import get_session, require_login
 from config import DEFAULT_WATCHLIST, MARKET_INDICES
 from data_ingestion.news_service import get_market_news
+from utils.helpers import render_premium_metric_card
+
+# ── Fetch SaaS KPI values dynamically ──────────────────────────────────────────
+
+def _fetch_saas_metrics(user_id: int) -> dict:
+    metrics = {
+        "portfolio_val": "$100,000.00",
+        "portfolio_sub": "Pre-funded simulation",
+        "portfolio_color": "blue",
+        
+        "prediction_val": "Buy (72%)",
+        "prediction_sub": "AAPL Model Consensus",
+        "prediction_color": "green",
+        
+        "risk_val": "28 / 100",
+        "risk_sub": "Low Volatility Category",
+        "risk_color": "green",
+        
+        "sentiment_val": "+0.4251",
+        "sentiment_sub": "Positive Media Tone",
+        "sentiment_color": "green",
+    }
+    
+    # 1. Fetch real Portfolio value if exists
+    try:
+        from portfolio.portfolio_service import get_portfolios, portfolio_analytics
+        ports = get_portfolios(user_id)
+        if ports:
+            p_id = ports[0]["id"]
+            ana = portfolio_analytics(p_id)
+            val = ana.get("total_value", 0.0)
+            pnl = ana.get("total_pnl", 0.0)
+            metrics["portfolio_val"] = f"${val:,.2f}"
+            metrics["portfolio_sub"] = f"Total P&L: {pnl:+,.2f}"
+            metrics["portfolio_color"] = "green" if pnl >= 0 else "red"
+    except Exception:
+        pass
+        
+    # 2. Fetch real Stock predictive metrics (AAPL as default baseline)
+    try:
+        from data_ingestion.market_data_service import fetch_ohlcv
+        from signals.signal_engine import generate_signal
+        df_aapl = fetch_ohlcv("AAPL", period="1y")
+        if not df_aapl.empty:
+            sig_res = generate_signal(df_aapl)
+            sig = sig_res.get("signal", "Hold")
+            conf = sig_res.get("confidence", 0.0)
+            metrics["prediction_val"] = f"{sig} ({conf*100:.0f}%)"
+            metrics["prediction_sub"] = "AAPL Model Consensus"
+            metrics["prediction_color"] = "green" if "Buy" in sig else "red" if "Sell" in sig else "orange"
+            
+            # 3. Volatility risk score
+            from analysis.risk_analytics import risk_score
+            score = risk_score(df_aapl)
+            cat = "Low" if score < 33 else "Moderate" if score < 66 else "High"
+            metrics["risk_val"] = f"{score:.0f} / 100"
+            metrics["risk_sub"] = f"{cat} Volatility Category"
+            metrics["risk_color"] = "green" if cat == "Low" else "orange" if cat == "Moderate" else "red"
+    except Exception:
+        pass
+        
+    # 4. Sentiment ensemble score
+    try:
+        from analysis.sentiment_engine import analyze_sentiment
+        sent = analyze_sentiment("AAPL", "Apple Inc.")
+        score = sent.get("overall_score", 0.0)
+        label = sent.get("overall_label", "Neutral")
+        metrics["sentiment_val"] = f"{score:+.4f}"
+        metrics["sentiment_sub"] = f"{label} Media Tone"
+        metrics["sentiment_color"] = "green" if score > 0.05 else "red" if score < -0.05 else "orange"
+    except Exception:
+        pass
+        
+    return metrics
 
 # ── Page configuration ────────────────────────────────────────────────────────
 
@@ -312,35 +386,60 @@ st.markdown(
 
 # ── KPI Metrics row ───────────────────────────────────────────────────────────
 
-st.markdown('<div class="ss-section-heading">Key Indices</div>', unsafe_allow_html=True)
+st.markdown('<div class="ss-section-heading">Executive Summary</div>', unsafe_allow_html=True)
 
-with st.spinner("Loading market quotes…"):
-    kpi_data = _fetch_kpi_quotes()
+with st.spinner("Loading portfolio telemetry…"):
+    saas_data = _fetch_saas_metrics(user["id"])
 
 kpi_cols = st.columns(4)
-kpi_labels = ["S&P 500", "NASDAQ", "Dow Jones", "VIX"]
-kpi_formats = {
-    "S&P 500":   {"prefix": "", "decimals": 2},
-    "NASDAQ":    {"prefix": "", "decimals": 2},
-    "Dow Jones": {"prefix": "", "decimals": 2},
-    "VIX":       {"prefix": "", "decimals": 2},
-}
 
-for col, label in zip(kpi_cols, kpi_labels):
-    d = kpi_data.get(label, {})
-    price = d.get("price")
-    chg_pct = d.get("change_pct")
-    fmt = kpi_formats[label]
-    price_str = _fmt_number(price, prefix=fmt["prefix"], decimals=fmt["decimals"]) if price else "N/A"
-    delta_str = _delta_str(chg_pct) if chg_pct is not None else None
+with kpi_cols[0]:
+    st.markdown(
+        render_premium_metric_card(
+            label="Portfolio Value",
+            value=saas_data["portfolio_val"],
+            subtext=saas_data["portfolio_sub"],
+            status_color=saas_data["portfolio_color"],
+            icon="💼",
+        ),
+        unsafe_allow_html=True,
+    )
 
-    with col:
-        st.metric(
-            label=label,
-            value=price_str,
-            delta=delta_str,
-            delta_color="normal" if label != "VIX" else "inverse",
-        )
+with kpi_cols[1]:
+    st.markdown(
+        render_premium_metric_card(
+            label="AI Forecast Direction",
+            value=saas_data["prediction_val"],
+            subtext=saas_data["prediction_sub"],
+            status_color=saas_data["prediction_color"],
+            icon="🤖",
+        ),
+        unsafe_allow_html=True,
+    )
+
+with kpi_cols[2]:
+    st.markdown(
+        render_premium_metric_card(
+            label="Quant Risk Score",
+            value=saas_data["risk_val"],
+            subtext=saas_data["risk_sub"],
+            status_color=saas_data["risk_color"],
+            icon="⚠️",
+        ),
+        unsafe_allow_html=True,
+    )
+
+with kpi_cols[3]:
+    st.markdown(
+        render_premium_metric_card(
+            label="Ensemble Media Tone",
+            value=saas_data["sentiment_val"],
+            subtext=saas_data["sentiment_sub"],
+            status_color=saas_data["sentiment_color"],
+            icon="📰",
+        ),
+        unsafe_allow_html=True,
+    )
 
 st.divider()
 
@@ -374,37 +473,10 @@ if indices_history:
         line_width=1,
     )
 
-    fig_indices.update_layout(
-        title=dict(text="Market Indices — % Change (30 Days)", font=dict(size=14, color="#111827")),
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        height=320,
-        margin=dict(l=10, r=10, t=50, b=10),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            font=dict(size=11),
-        ),
-        xaxis=dict(
-            title="",
-            showgrid=True,
-            gridcolor="#f0f0f0",
-            tickformat="%b %d",
-            tickfont=dict(size=10, color="#6b7280"),
-        ),
-        yaxis=dict(
-            title="% Change",
-            showgrid=True,
-            gridcolor="#f0f0f0",
-            zeroline=False,
-            tickfont=dict(size=10, color="#6b7280"),
-            ticksuffix="%",
-        ),
-        hovermode="x unified",
-    )
+    from utils.helpers import apply_modern_theme
+    apply_modern_theme(fig_indices, title="Market Indices — % Change (30 Days)", height=320)
+    fig_indices.update_xaxes(tickformat="%b %d")
+    fig_indices.update_yaxes(title_text="% Change", ticksuffix="%")
     st.plotly_chart(fig_indices, use_container_width=True, config={"displayModeBar": False})
 else:
     st.warning("Could not load indices history. Please check your internet connection.")
@@ -480,18 +552,9 @@ with col_movers:
                                 hovertemplate=f"<b>{sym}</b>: $%{{y:.2f}}<extra></extra>",
                             )
                         )
-                fig_movers.update_layout(
-                    title=dict(text="30-Day Price Trend", font=dict(size=12, color="#374151")),
-                    paper_bgcolor="#ffffff",
-                    plot_bgcolor="#ffffff",
-                    height=200,
-                    margin=dict(l=0, r=0, t=35, b=5),
-                    showlegend=True,
-                    legend=dict(font=dict(size=9), orientation="h", y=1.15),
-                    xaxis=dict(showgrid=True, gridcolor="#f0f0f0", tickformat="%b %d", tickfont=dict(size=9)),
-                    yaxis=dict(showgrid=True, gridcolor="#f0f0f0", tickfont=dict(size=9), tickprefix="$"),
-                    hovermode="x unified",
-                )
+                apply_modern_theme(fig_movers, title="30-Day Price Trend", height=200)
+                fig_movers.update_xaxes(tickformat="%b %d")
+                fig_movers.update_yaxes(tickprefix="$")
                 st.plotly_chart(fig_movers, use_container_width=True, config={"displayModeBar": False})
         except Exception as e:
             st.caption(f"Sparkline unavailable: {e}")

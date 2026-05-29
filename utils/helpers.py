@@ -125,3 +125,84 @@ def risk_color(category: str) -> str:
 
 def returns_color(value: float) -> str:
     return "#27ae60" if value >= 0 else "#e74c3c"
+
+
+# ── Premium SaaS KPI & Chart Styling Helpers ─────────────────────────────────
+
+def render_premium_metric_card(
+    label: str,
+    value: str,
+    subtext: str = "",
+    status_color: str = "blue",
+    icon: str = "",
+) -> str:
+    """Render a premium styled HTML card for FinTech KPIs with shadows and hover scale transitions."""
+    border_color_map = {
+        "blue": "#2563EB",
+        "cyan": "#06B6D4",
+        "green": "#10B981",
+        "orange": "#F59E0B",
+        "red": "#EF4444",
+        "grey": "#e5e7eb",
+    }
+    
+    border_color = border_color_map.get(status_color, "#e5e7eb")
+    icon_html = f"<span style='font-size: 1.25rem;'>{icon}</span>" if icon else ""
+    
+    return f"""
+    <div class="stat-card" style="
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-left: 5px solid {border_color};
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+        margin-bottom: 0.8rem;
+    ">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+        <span style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">{label}</span>
+        {icon_html}
+      </div>
+      <div style="font-size: 1.65rem; font-weight: 800; color: #111827; margin: 0.25rem 0;">{value}</div>
+      <div style="font-size: 0.8rem; color: #6b7280; font-weight: 500;">{subtext}</div>
+    </div>
+    """
+
+
+def apply_modern_theme(fig, title: str = "", height: int = 400, show_legend: bool = True):
+    """Apply modern light SaaS/Bloomberg theme to a Plotly figure."""
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=14, color="#111827", family="Inter, sans-serif")),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color="#374151"),
+        height=height,
+        margin=dict(l=10, r=10, t=50, b=10),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            font=dict(size=10),
+            bgcolor="rgba(255,255,255,0.8)",
+        ) if show_legend else dict(visible=False),
+        hovermode="x unified",
+    )
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor="#f3f4f6",
+        zeroline=False,
+        linecolor="#e5e7eb",
+        tickfont=dict(size=10, color="#6b7280"),
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="#f3f4f6",
+        zeroline=False,
+        linecolor="#e5e7eb",
+        tickfont=dict(size=10, color="#6b7280"),
+    )
+    return fig

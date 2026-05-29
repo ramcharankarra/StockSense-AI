@@ -128,7 +128,7 @@ def _render_sidebar(user: dict) -> None:
             """
             <div style='padding: 0.5rem 0 1rem;'>
               <div style='display:flex; align-items:center; gap:0.6rem;'>
-                <div style='width: 32px; height: 32px; background: #1a56db; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.1rem; font-family: sans-serif;'>S</div>
+                <div style='width: 32px; height: 32px; background: #2563eb; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.1rem; font-family: sans-serif;'>S</div>
                 <div>
                   <div style='font-size:1.1rem; font-weight:800; color:#111827; line-height:1.2;'>StockSense AI</div>
                   <div style='font-size:0.7rem; color:#6b7280; font-weight:500;'>v1.0 · FinTech Platform</div>
@@ -142,7 +142,7 @@ def _render_sidebar(user: dict) -> None:
         # User info
         st.markdown(
             f"""
-            <div style='background:#f0f4ff; border:1px solid #c7d8fe; border-radius:8px;
+            <div style='background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px;
                         padding:0.75rem 1rem; margin-bottom:1rem;'>
               <div style='font-size:0.8rem; color:#4b5563; font-weight:500;'>Signed in as</div>
               <div style='font-size:0.95rem; font-weight:700; color:#111827;'>{user.get("full_name") or user["username"]}</div>

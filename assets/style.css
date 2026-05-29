@@ -7,27 +7,29 @@
 
 /* ── Root tokens ─────────────────────────────────────────────── */
 :root {
-  --primary:       #1a56db;
-  --primary-dark:  #1340a8;
-  --primary-light: #e8f0fe;
-  --accent:        #0e9f6e;
-  --accent-light:  #def7ec;
-  --danger:        #c81e1e;
-  --danger-light:  #fde8e8;
-  --warning:       #b45309;
-  --warning-light: #fef3c7;
-  --neutral-50:    #f9fafb;
-  --neutral-100:   #f3f4f6;
-  --neutral-200:   #e5e7eb;
-  --neutral-300:   #d1d5db;
-  --neutral-600:   #4b5563;
+  --primary:       #2563EB; /* Modern SaaS Blue */
+  --primary-dark:  #1D4ED8;
+  --primary-light: #EFF6FF;
+  --secondary:     #06B6D4; /* Modern Cyan */
+  --secondary-light:#ECFEFF;
+  --success:       #10B981; /* Success Green */
+  --success-light: #D1FAE5;
+  --warning:       #F59E0B; /* Warning Orange */
+  --warning-light: #FEF3C7;
+  --danger:        #EF4444; /* Danger Red */
+  --danger-light:  #FEE2E2;
+  --neutral-50:    #F9FAFB;
+  --neutral-100:   #F3F4F6;
+  --neutral-200:   #E5E7EB;
+  --neutral-300:   #D1D5DB;
+  --neutral-600:   #4B5563;
   --neutral-700:   #374151;
   --neutral-900:   #111827;
-  --white:         #ffffff;
-  --shadow-sm:     0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:     0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
-  --shadow-lg:     0 10px 25px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.05);
-  --radius:        10px;
+  --white:         #FFFFFF;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+  --shadow-md:     0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-lg:     0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+  --radius:        12px; /* Smooth rounded corners */
   --radius-lg:     16px;
 }
 
@@ -217,6 +219,12 @@ hr {
   border-radius: var(--radius);
   padding: 1.25rem;
   box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 /* ── Progress bar override ───────────────────────────────────── */

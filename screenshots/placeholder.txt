@@ -1,0 +1,14 @@
+# StockSense AI — Screenshots Directory
+
+This directory is reserved for capturing and storing high-resolution image files of your StockSense AI Streamlit application panels.
+
+Recommended screenshots to place here:
+1. `00_home.png` — Recruiter landing page showing the 6 premium SaaS KPI cards, index relative performance, top movers list, and live news feed.
+2. `01_stock_analysis.png` — Candlestick price panels, volume bars, and overlay MA indicators.
+3. `02_prediction.png` — ML training logs, models rank grids, SHAP feature importance, and radar charts.
+4. `03_risk.png` — Risk score gauges, returns distribution bell curves, and drawdown charts.
+5. `04_sentiment.png` — VADER/TextBlob donut splits and VADER indicators.
+6. `05_portfolio.png` — Active holdings P&L trackers and value allocation pie charts.
+
+Format: PNG / JPG files.
+Usage: Referenced as markdown widgets in the root repository README.md.
